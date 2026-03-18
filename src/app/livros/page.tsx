@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Book, Trash2 } from "lucide-react";
@@ -22,20 +23,22 @@ export default function ListaLivros() {
   const [ordemAno, setOrdemAno] = useState<"asc" | "desc" | "">("");
 
   useEffect(() => {
-    const auth = localStorage.getItem("auth");
+    const carregarLivros = () => {
+      const auth = localStorage.getItem("auth");
+      if (!auth) {
+        router.replace("/");
+        return;
+      }
 
-    if (!auth) {
-      router.replace("/");
-      return;
-    }
+      const dadosSalvos = localStorage.getItem("meus-livros");
+      if (dadosSalvos) {
+        setLivros(JSON.parse(dadosSalvos) as Livro[]);
+      }
 
-    const dadosSalvos = localStorage.getItem("meus-livros");
+      setLoading(false);
+    };
 
-    if (dadosSalvos) {
-      setLivros(JSON.parse(dadosSalvos));
-    }
-
-    setLoading(false);
+    carregarLivros();
   }, [router]);
 
   const excluirLivro = (id: number) => {
@@ -111,7 +114,9 @@ export default function ListaLivros() {
 
           <select
             value={ordemAno}
-            onChange={(e) => setOrdemAno(e.target.value as any)}
+            onChange={(e) =>
+              setOrdemAno(e.target.value as "asc" | "desc" | "")
+            }
             style={filterStyle}
           >
             <option value="">Ordenar por ano</option>
@@ -120,6 +125,7 @@ export default function ListaLivros() {
           </select>
         </div>
 
+        {/* LISTA DE LIVROS */}
         <div
           style={{
             display: "grid",
@@ -167,6 +173,7 @@ export default function ListaLivros() {
   );
 }
 
+// ===== Estilos =====
 const bannerStyle: React.CSSProperties = {
   width: "100%",
   height: "400px",
